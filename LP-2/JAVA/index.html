@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diffie-Hellman Key Exchange</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+        }
+        label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Diffie-Hellman Key Exchange</h1>
+    <div>
+        <label for="prime">Enter Prime Number (p): </label>
+        <input type="number" id="prime" placeholder="Prime number p" value="23" />
+    </div>
+    <div>
+        <label for="base">Enter Base (g): </label>
+        <input type="number" id="base" placeholder="Base g" value="5" />
+    </div>
+    <div>
+        <label for="aliceSecret">Enter Alice's Private Key (a): </label>
+        <input type="number" id="aliceSecret" placeholder="Alice's Private Key" value="6" />
+    </div>
+    <div>
+        <label for="bobSecret">Enter Bob's Private Key (b): </label>
+        <input type="number" id="bobSecret" placeholder="Bob's Private Key" value="15" />
+    </div>
+    <div>
+        <button onclick="startKeyExchange()">Start Key Exchange</button>
+    </div>
+    <div>
+        <h2>Shared Secret Key:</h2>
+        <p id="sharedKey">No key generated yet.</p>
+    </div>
+
+    <script>
+        // Function to compute the modular exponentiation: (base^exponent) % modulus
+        function modExp(base, exponent, modulus) {
+            let result = 1;
+            base = base % modulus;
+            while (exponent > 0) {
+                if (exponent % 2 === 1) {
+                    result = (result * base) % modulus;
+                }
+                exponent = Math.floor(exponent / 2);
+                base = (base * base) % modulus;
+            }
+            return result;
+        }
+
+        // Function to start the Diffie-Hellman key exchange process
+        function startKeyExchange() {
+            // Getting values from the input fields
+            const p = parseInt(document.getElementById("prime").value);
+            const g = parseInt(document.getElementById("base").value);
+            const aliceSecret = parseInt(document.getElementById("aliceSecret").value);
+            const bobSecret = parseInt(document.getElementById("bobSecret").value);
+
+            // Step 1: Alice calculates A = g^a % p and sends A to Bob
+            const alicePublic = modExp(g, aliceSecret, p);
+
+            // Step 2: Bob calculates B = g^b % p and sends B to Alice
+            const bobPublic = modExp(g, bobSecret, p);
+
+            // Step 3: Alice computes shared key using B and her private key (a)
+            const aliceSharedKey = modExp(bobPublic, aliceSecret, p);
+
+            // Step 4: Bob computes shared key using A and his private key (b)
+            const bobSharedKey = modExp(alicePublic, bobSecret, p);
+
+            // Step 5: Check if Alice and Bob computed the same shared secret key
+            if (aliceSharedKey === bobSharedKey) {
+                document.getElementById("sharedKey").innerText = `Shared Secret Key: ${aliceSharedKey}`;
+            } else {
+                document.getElementById("sharedKey").innerText = "Error in key exchange. Keys don't match.";
+            }
+        }
+    </script>
+</body>
+</html>
